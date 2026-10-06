@@ -1,67 +1,113 @@
 <template>
   <NuxtLayout name="dashboard" title="Overview" subtitle="Your NigeriaData dashboard">
-    <div v-if="loading" class="loading-state">
-      <Icon name="ph:spinner-gap-bold" style="font-size:1.5rem;color:var(--primary);animation:spin 1s linear infinite" />
-      <span>Loading dashboard...</span>
-    </div>
-    <div v-else>
+    <div class="dash">
 
-      <!-- Stats -->
-      <div class="stats-grid">
-        <div class="stat-card" v-for="stat in statCards" :key="stat.label">
-          <div class="stat-icon" :style="`background:${stat.bg}`">
-            <Icon :name="stat.icon" :style="`font-size:1.1rem;color:${stat.color}`" />
+      <!-- Loading skeleton -->
+      <div v-if="loading" class="skeleton-wrap" aria-busy="true" aria-live="polite">
+        <span class="sr-only">Loading dashboard...</span>
+        <div class="stats-grid">
+          <div v-for="n in 4" :key="n" class="stat-card skeleton-card">
+            <div class="sk sk-icon" />
+            <div class="sk-lines">
+              <div class="sk sk-line sk-line-sm" />
+              <div class="sk sk-line sk-line-lg" />
+            </div>
           </div>
-          <div class="stat-body">
-            <p class="stat-label">{{ stat.label }}</p>
-            <p class="stat-value">{{ stat.value }}</p>
-          </div>
+        </div>
+        <div class="dash-row">
+          <div class="card sk sk-block" />
+          <div class="card sk sk-block" />
         </div>
       </div>
 
-      <!-- Plan + actions row -->
-      <div class="dash-row">
+      <!-- Error state -->
+      <div v-else-if="loadError" class="card error-card" role="alert">
+        <div class="error-icon">
+          <Icon name="ph:warning-circle-fill" style="font-size:1.5rem" />
+        </div>
+        <div class="error-text">
+          <p class="error-title">We couldn't load your dashboard</p>
+          <p class="error-sub">Check your connection and try again.</p>
+        </div>
+        <button type="button" class="dash-btn dash-btn-primary" @click="loadStats">
+          <Icon name="ph:arrow-clockwise" /> Try again
+        </button>
+      </div>
 
-        <!-- Plan card -->
-        <div class="plan-status-card">
-          <div class="plan-status-top">
-            <div>
-              <p class="plan-status-label">Current Plan</p>
-              <p class="plan-status-name">{{ stats.plan?.toUpperCase() }}</p>
+      <div v-else>
+
+        <!-- Stats -->
+        <div class="stats-grid">
+          <div
+            v-for="stat in statCards"
+            :key="stat.label"
+            class="stat-card"
+            :class="{ 'stat-card-featured': stat.featured }"
+          >
+            <div class="stat-icon">
+              <Icon :name="stat.icon" style="font-size:1.2rem" />
             </div>
-            <span class="badge" :class="`badge-${stats.plan}`">{{ stats.plan }}</span>
+            <div class="stat-body">
+              <p class="stat-label">{{ stat.label }}</p>
+              <p class="stat-value">{{ stat.value }}</p>
+            </div>
           </div>
-          <div class="plan-progress-section">
-            <div class="plan-progress-labels">
-              <span>Leads used this month</span>
-              <span>{{ stats.leads_used }} / {{ stats.leads_limit }}</span>
-            </div>
-            <div class="plan-progress-track">
-              <div class="plan-progress-fill"
-                :style="`width:${Math.min(((stats.leads_used||0)/(stats.leads_limit||1))*100,100)}%;background:${progressColor}`" />
-            </div>
-          </div>
-          <NuxtLink v-if="stats.plan !== 'enterprise'" to="/dashboard/billing" class="btn btn-primary btn-sm" style="width:100%;justify-content:center">
-            Upgrade Plan →
-          </NuxtLink>
         </div>
 
-        <!-- Quick actions -->
-        <div class="quick-actions-card">
-          <p class="quick-title">Quick Actions</p>
-          <div class="quick-grid">
-            <NuxtLink v-for="action in quickActions" :key="action.to" :to="action.to" class="quick-item">
-              <div class="quick-item-icon" :style="`background:${action.bg}`">
-                <Icon :name="action.icon" :style="`font-size:1rem;color:${action.color}`" />
-              </div>
+        <!-- Plan + actions row -->
+        <div class="dash-row">
+
+          <!-- Plan card -->
+          <section class="card plan-card" aria-labelledby="plan-heading">
+            <div class="plan-top">
               <div>
-                <p class="quick-item-label">{{ action.label }}</p>
-                <p class="quick-item-sub">{{ action.sub }}</p>
+                <p id="plan-heading" class="card-eyebrow">Current plan</p>
+                <p class="plan-name">{{ stats.plan?.toUpperCase() || 'FREE' }}</p>
               </div>
-            </NuxtLink>
-          </div>
-        </div>
+              <span class="plan-badge">{{ stats.plan || 'free' }}</span>
+            </div>
 
+            <div class="plan-progress">
+              <div class="plan-progress-labels">
+                <span>Leads used this month</span>
+                <span class="plan-progress-count">{{ stats.leads_used || 0 }} / {{ stats.leads_limit || 0 }}</span>
+              </div>
+              <div
+                class="plan-progress-track"
+                role="progressbar"
+                :aria-valuenow="Math.round(usedPct)"
+                aria-valuemin="0"
+                aria-valuemax="100"
+                aria-label="Leads used this month"
+              >
+                <div class="plan-progress-fill" :style="{ width: usedPct + '%', background: progressColor }" />
+              </div>
+              <p class="plan-progress-note" :class="`note-${usageLevel}`">{{ usageMessage }}</p>
+            </div>
+
+            <NuxtLink v-if="stats.plan !== 'enterprise'" to="/dashboard/billing" class="dash-btn dash-btn-primary dash-btn-block">
+              Upgrade plan <Icon name="ph:arrow-right" />
+            </NuxtLink>
+          </section>
+
+          <!-- Quick actions -->
+          <section class="card actions-card" aria-labelledby="actions-heading">
+            <p id="actions-heading" class="card-title">Quick actions</p>
+            <div class="quick-grid">
+              <NuxtLink v-for="action in quickActions" :key="action.label" :to="action.to" class="quick-item">
+                <div class="quick-item-icon">
+                  <Icon :name="action.icon" style="font-size:1.1rem" />
+                </div>
+                <div class="quick-item-text">
+                  <p class="quick-item-label">{{ action.label }}</p>
+                  <p class="quick-item-sub">{{ action.sub }}</p>
+                </div>
+                <Icon name="ph:caret-right" class="quick-item-arrow" />
+              </NuxtLink>
+            </div>
+          </section>
+
+        </div>
       </div>
     </div>
   </NuxtLayout>
@@ -71,59 +117,176 @@
 definePageMeta({ middleware: 'auth' })
 const { api } = useAuth()
 const loading = ref(true)
+const loadError = ref(false)
 const stats = ref<any>({})
 
+const loadStats = async () => {
+  loading.value = true
+  loadError.value = false
+  try { stats.value = await api('/businesses/stats/') }
+  catch { loadError.value = true }
+  finally { loading.value = false }
+}
+onMounted(loadStats)
+
 const statCards = computed(() => [
-  { label: 'Total Businesses', value: stats.value.total_businesses?.toLocaleString() || '0', icon: 'ph:buildings-fill', bg: '#eff6ff', color: '#1d4ed8' },
-  { label: 'Leads Remaining', value: stats.value.leads_remaining?.toLocaleString() || '0', icon: 'ph:check-circle-fill', bg: '#f0fdf4', color: '#15803d' },
-  { label: 'Leads Used', value: `${stats.value.leads_used || 0} / ${stats.value.leads_limit || 0}`, icon: 'ph:database-fill', bg: '#fffbeb', color: '#b45309' },
-  { label: 'Total Exports', value: stats.value.total_exports || '0', icon: 'ph:export-fill', bg: '#faf5ff', color: '#7c3aed' },
+  { label: 'Leads remaining', value: stats.value.leads_remaining?.toLocaleString() || '0', icon: 'ph:check-circle-fill', featured: true },
+  { label: 'Leads used', value: `${stats.value.leads_used || 0} / ${stats.value.leads_limit || 0}`, icon: 'ph:database-fill', featured: false },
+  { label: 'Total businesses', value: stats.value.total_businesses?.toLocaleString() || '0', icon: 'ph:buildings-fill', featured: false },
+  { label: 'Total exports', value: stats.value.total_exports?.toLocaleString?.() || '0', icon: 'ph:export-fill', featured: false },
 ])
 
-const progressColor = computed(() => {
-  const pct = ((stats.value.leads_used||0)/(stats.value.leads_limit||1))*100
-  if (pct >= 90) return '#dc2626'
-  if (pct >= 70) return '#d97706'
-  return 'var(--primary)'
+// Usage
+const usedPct = computed(() => {
+  const limit = stats.value.leads_limit || 0
+  if (!limit) return 0
+  return Math.min(((stats.value.leads_used || 0) / limit) * 100, 100)
+})
+const usageLevel = computed(() => usedPct.value >= 90 ? 'high' : usedPct.value >= 70 ? 'mid' : 'ok')
+const progressColor = computed(() =>
+  usageLevel.value === 'high' ? '#dc2626' : usageLevel.value === 'mid' ? '#d97706' : 'var(--primary)'
+)
+const usageMessage = computed(() => {
+  const left = (stats.value.leads_remaining ?? 0).toLocaleString()
+  if (usageLevel.value === 'high') return `Almost out: only ${left} leads left this month.`
+  if (usageLevel.value === 'mid') return `You've used ${Math.round(usedPct.value)}% of your leads. ${left} left.`
+  return `${left} leads left this month.`
 })
 
-const quickActions = [
-  { to: '/dashboard/leads', label: 'Search Leads', sub: 'Find businesses by industry', icon: 'ph:magnifying-glass-fill', bg: '#eff6ff', color: '#1d4ed8' },
-  { to: '/dashboard/leads', label: 'Export CSV', sub: 'Download filtered leads', icon: 'ph:export-fill', bg: '#f0fdf4', color: '#15803d' },
-  { to: '/dashboard/reports', label: 'Market Reports', sub: 'Latest Nigerian insights', icon: 'ph:chart-bar-fill', bg: '#fff7ed', color: '#c2410c' },
-  { to: '/dashboard/billing', label: 'Manage Billing', sub: 'View plan and payments', icon: 'ph:credit-card-fill', bg: '#faf5ff', color: '#7c3aed' },
-]
-
-onMounted(async () => {
-  try { stats.value = await api('/businesses/stats/') }
-  finally { loading.value = false }
+// Free plan has no export, so point those users to upgrade instead of a dead end
+const quickActions = computed(() => {
+  const canExport = stats.value.plan && stats.value.plan !== 'free'
+  return [
+    { to: '/dashboard/leads', label: 'Search leads', sub: 'Find businesses by industry', icon: 'ph:magnifying-glass-fill' },
+    canExport
+      ? { to: '/dashboard/leads', label: 'Export CSV', sub: 'Download filtered leads', icon: 'ph:export-fill' }
+      : { to: '/dashboard/billing', label: 'Export CSV', sub: 'Upgrade to unlock exports', icon: 'ph:lock-simple-fill' },
+    { to: '/dashboard/reports', label: 'Market reports', sub: 'Latest Nigerian insights', icon: 'ph:chart-bar-fill' },
+    { to: '/dashboard/billing', label: 'Plan & payments', sub: 'View plan and payment history', icon: 'ph:receipt-fill' },
+  ]
 })
 </script>
 
 <style scoped>
-@keyframes spin { to { transform: rotate(360deg); } }
-.loading-state { display: flex; align-items: center; gap: 0.75rem; color: var(--text-muted); padding: 3rem; }
-.stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px,1fr)); gap: 1rem; margin-bottom: 1.25rem; }
-.stat-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; display: flex; align-items: center; gap: 1rem; box-shadow: var(--shadow-sm); transition: all 0.15s; }
+.dash {
+  /* Nigerian flag green theme */
+  --primary: #008751;
+  --primary-dark: #006b41;
+  --primary-light: #e8f5ee;
+  --primary-border: #b7dfc9;
+  font-family: var(--font);
+  min-width: 0;
+}
+
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+
+/* Shared card */
+.card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.5rem; box-shadow: var(--shadow-sm); }
+.card-eyebrow { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.25rem; }
+.card-title { font-size: 0.95rem; font-weight: 700; color: var(--gray-900); margin-bottom: 1rem; }
+
+/* Buttons */
+.dash-btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.5rem; height: 44px; padding: 0 1.1rem; font: inherit; font-size: 0.9rem; font-weight: 600; text-decoration: none; border: 0; border-radius: var(--radius-md); cursor: pointer; transition: background 0.15s; }
+.dash-btn-primary { background: var(--primary); color: white; }
+.dash-btn-primary:hover { background: var(--primary-dark); }
+.dash-btn:focus-visible { outline: 2px solid var(--primary-dark); outline-offset: 2px; }
+.dash-btn-block { width: 100%; }
+
+/* Stats */
+.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.25rem; }
+.stat-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; display: flex; align-items: center; gap: 1rem; box-shadow: var(--shadow-sm); min-width: 0; transition: border-color 0.15s, box-shadow 0.15s; }
 .stat-card:hover { box-shadow: var(--shadow-md); border-color: var(--primary-border); }
-.stat-icon { width: 44px; height: 44px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.stat-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.25rem; }
-.stat-value { font-size: 1.375rem; font-weight: 700; color: var(--gray-900); }
-.dash-row { display: grid; grid-template-columns: 300px 1fr; gap: 1.25rem; }
-.plan-status-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; box-shadow: var(--shadow-sm); display: flex; flex-direction: column; gap: 1.25rem; }
-.plan-status-top { display: flex; justify-content: space-between; align-items: flex-start; }
-.plan-status-label { font-size: 0.75rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.25rem; }
-.plan-status-name { font-size: 1.25rem; font-weight: 700; color: var(--gray-900); }
-.plan-progress-labels { display: flex; justify-content: space-between; font-size: 0.75rem; color: var(--text-muted); margin-bottom: 0.5rem; }
-.plan-progress-track { background: var(--gray-100); border-radius: 999px; height: 6px; overflow: hidden; }
+.stat-icon { width: 46px; height: 46px; border-radius: var(--radius-md); display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--primary-light); color: var(--primary); }
+.stat-body { min-width: 0; }
+.stat-label { font-size: 0.78rem; color: var(--text-muted); font-weight: 500; margin-bottom: 0.2rem; }
+.stat-value { font-size: 1.5rem; font-weight: 800; color: var(--gray-900); letter-spacing: -0.01em; line-height: 1.15; overflow-wrap: anywhere; }
+
+/* The one emphasized card: leads remaining */
+.stat-card-featured { background: var(--primary); border-color: var(--primary); }
+.stat-card-featured:hover { border-color: var(--primary-dark); }
+.stat-card-featured .stat-icon { background: rgba(255,255,255,0.2); color: white; }
+.stat-card-featured .stat-label { color: rgba(255,255,255,0.85); }
+.stat-card-featured .stat-value { color: white; }
+
+/* Plan + actions */
+.dash-row { display: grid; grid-template-columns: 320px 1fr; gap: 1.25rem; align-items: start; }
+
+.plan-card { display: flex; flex-direction: column; gap: 1.5rem; }
+.plan-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 0.75rem; }
+.plan-name { font-size: 1.4rem; font-weight: 800; color: var(--gray-900); letter-spacing: 0.01em; }
+.plan-badge { padding: 0.25rem 0.75rem; font-size: 0.75rem; font-weight: 700; text-transform: capitalize; color: var(--primary); background: var(--primary-light); border: 1px solid var(--primary-border); border-radius: 999px; }
+
+.plan-progress-labels { display: flex; justify-content: space-between; gap: 0.5rem; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 0.5rem; }
+.plan-progress-count { font-weight: 600; color: var(--gray-700); white-space: nowrap; }
+.plan-progress-track { background: var(--primary-light); border-radius: 999px; height: 8px; overflow: hidden; }
 .plan-progress-fill { height: 100%; border-radius: 999px; transition: width 0.5s ease; }
-.quick-actions-card { background: white; border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 1.25rem; box-shadow: var(--shadow-sm); }
-.quick-title { font-size: 0.875rem; font-weight: 600; color: var(--gray-700); margin-bottom: 1rem; }
+.plan-progress-note { margin-top: 0.625rem; font-size: 0.8rem; color: var(--text-muted); }
+.note-mid { color: #b45309; }
+.note-high { color: #b91c1c; font-weight: 600; }
+
+/* Quick actions */
 .quick-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
-.quick-item { display: flex; align-items: center; gap: 0.75rem; padding: 0.875rem; border: 1px solid var(--border); border-radius: var(--radius-md); text-decoration: none; transition: all 0.15s; }
+.quick-item { display: flex; align-items: center; gap: 0.875rem; padding: 1rem; min-height: 68px; border: 1px solid var(--border); border-radius: var(--radius-md); text-decoration: none; background: white; transition: border-color 0.15s, background 0.15s; }
 .quick-item:hover { border-color: var(--primary-border); background: var(--primary-light); }
-.quick-item-icon { width: 36px; height: 36px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.quick-item-label { font-size: 0.825rem; font-weight: 600; color: var(--gray-800); }
-.quick-item-sub { font-size: 0.75rem; color: var(--text-muted); }
-@media (max-width: 900px) { .dash-row { grid-template-columns: 1fr; } }
+.quick-item:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.quick-item-icon { width: 40px; height: 40px; border-radius: var(--radius); display: flex; align-items: center; justify-content: center; flex-shrink: 0; background: var(--primary-light); color: var(--primary); }
+.quick-item:hover .quick-item-icon { background: white; }
+.quick-item-text { flex: 1; min-width: 0; }
+.quick-item-label { font-size: 0.875rem; font-weight: 600; color: var(--gray-800); }
+.quick-item-sub { font-size: 0.78rem; color: var(--text-muted); line-height: 1.35; }
+.quick-item-arrow { flex-shrink: 0; color: var(--gray-500); transition: transform 0.15s, color 0.15s; }
+.quick-item:hover .quick-item-arrow { color: var(--primary); transform: translateX(2px); }
+
+/* Error */
+.error-card { display: flex; align-items: center; gap: 1rem; flex-wrap: wrap; }
+.error-icon { width: 48px; height: 48px; border-radius: var(--radius-md); background: #fdf2f2; color: #b91c1c; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.error-text { flex: 1; min-width: 200px; }
+.error-title { font-weight: 700; color: var(--gray-900); }
+.error-sub { font-size: 0.85rem; color: var(--text-muted); }
+
+/* Skeleton */
+.sk { background: linear-gradient(90deg, var(--primary-light) 25%, #f4faf7 50%, var(--primary-light) 75%); background-size: 200% 100%; animation: shimmer 1.4s ease-in-out infinite; border-radius: var(--radius-md); }
+@keyframes shimmer { from { background-position: 200% 0; } to { background-position: -200% 0; } }
+.skeleton-card { min-height: 88px; }
+.sk-icon { width: 46px; height: 46px; flex-shrink: 0; }
+.sk-lines { flex: 1; display: flex; flex-direction: column; gap: 0.5rem; }
+.sk-line { height: 12px; }
+.sk-line-sm { width: 55%; }
+.sk-line-lg { height: 20px; width: 80%; }
+.sk-block { height: 220px; border: 1px solid var(--border); }
+
+/* ---------- Responsive ---------- */
+@media (max-width: 1200px) {
+  .stats-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .dash-row { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 600px) {
+  .card { padding: 1.25rem; }
+  .stats-grid { gap: 0.75rem; margin-bottom: 1rem; }
+  .stat-card { padding: 1rem; gap: 0.75rem; }
+  .stat-icon { width: 40px; height: 40px; }
+  .stat-value { font-size: 1.25rem; }
+  .quick-grid { grid-template-columns: 1fr; }
+}
+
+@media (max-width: 400px) {
+  .stats-grid { grid-template-columns: 1fr; }
+}
+
+@media (hover: none) {
+  .stat-card:hover { box-shadow: var(--shadow-sm); border-color: var(--border); }
+  .stat-card-featured:hover { border-color: var(--primary); }
+  .quick-item:hover { background: white; border-color: var(--border); }
+  .quick-item:hover .quick-item-icon { background: var(--primary-light); }
+  .quick-item:hover .quick-item-arrow { transform: none; color: var(--gray-500); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sk { animation: none; }
+  .plan-progress-fill, .quick-item-arrow { transition: none; }
+}
 </style>
