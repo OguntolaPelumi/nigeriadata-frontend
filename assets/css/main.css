@@ -3,9 +3,8 @@
   /* Primary */
   --primary: #008751;
   --primary-hover:  #008751;
-  --primary-dark: #006b41;
-  --primary-light: #e8f5ee;
-  --primary-border: #b7dfc9;
+  --primary-light: #057a55;
+  --primary-border: ;
 
   /* Neutrals */
   --gray-50: #f9fafb;
@@ -30,16 +29,8 @@
   --info-bg: #ebf5ff;
 
   /* Surface */
-  --bg: #eef7f2;
-  --bg-subtle: #f4faf7;
-  --bg-deep: #dcefe4;
-  --surface-tint: rgba(244, 250, 247, 0.92);
-  --border-green: #cfe7da;
-  /* Soft Nigerian-green page canvas: mint base with two faint green glows */
-  --canvas:
-    radial-gradient(1100px 600px at 0% 0%, rgba(0, 135, 81, 0.10), transparent 60%),
-    radial-gradient(900px 520px at 100% 100%, rgba(0, 135, 81, 0.08), transparent 60%),
-    linear-gradient(180deg, #f1f9f5 0%, #e4f3eb 100%);
+  --bg: #ffffff;
+  --bg-subtle: #f9fafb;
   --surface: #ffffff;
   --border: #e5e7eb;
   --border-strong: #d1d5db;
@@ -71,11 +62,11 @@
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
-body { font-family: var(--font); color: var(--text); background: var(--bg) var(--canvas) fixed; line-height: 1.5; min-height: 100vh; }
-::selection { background: #b7dfc9; color: var(--primary-dark); }
+body { font-family: var(--font); color: var(--text); background: var(--bg); line-height: 1.5; }
+::selection { background: #bfdbfe; color: var(--primary-hover); }
 
 /* ── Dashboard Layout ── */
-.dashboard-layout { display: flex; min-height: 100vh; background: var(--bg) var(--canvas) fixed; }
+.dashboard-layout { display: flex; min-height: 100vh; background: var(--bg-subtle); }
 .dashboard-main { flex: 1; margin-left: 256px; min-height: 100vh; display: flex; flex-direction: column; }
 .dashboard-content { padding: 1.5rem 2rem; flex: 1; max-width: 1280px; }
 
