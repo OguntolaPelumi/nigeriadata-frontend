@@ -163,7 +163,8 @@ const handleLogin = async () => {
   align-items: center;
   justify-content: center;
   padding: 2rem;
-  background: var(--gray-50);
+  background-color: var(--bg);
+  background-image: var(--bg-fade);
   min-width: 0;
 }
 

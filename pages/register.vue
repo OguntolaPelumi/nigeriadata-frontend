@@ -166,7 +166,8 @@ const handleRegister = async () => {
   flex: 1;
   display: flex;
   padding: 2rem;
-  background: #f4faf7;
+  background-color: var(--bg);
+  background-image: var(--bg-fade);
   overflow-y: auto;
   min-width: 0;
 }

@@ -194,7 +194,8 @@ const plans = [
   --primary-light: #e8f5ee;
   --primary-border: #b7dfc9;
 
-  background: white;
+  background-color: var(--bg);
+  background-image: var(--bg-fade);
   color: var(--text);
   font-family: var(--font);
   overflow-x: hidden;
@@ -221,7 +222,7 @@ const plans = [
 .nav-toggle:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 /* Hero */
-.hero { padding: 8rem 2rem 5rem; text-align: center; background: linear-gradient(180deg, #f2faf6 0%, white 100%); border-bottom: 1px solid var(--border); }
+.hero { padding: 8rem 2rem 5rem; text-align: center; background: linear-gradient(180deg, #e3f2ea 0%, #eef7f2 100%); border-bottom: 1px solid var(--border); }
 .hero-inner { max-width: 720px; margin: 0 auto; }
 .hero-badge { display: inline-flex; align-items: center; gap: 0.5rem; background: var(--primary-light); border: 1px solid var(--primary-border); color: var(--primary); padding: 0.375rem 0.875rem; border-radius: 999px; font-size: 0.8rem; font-weight: 600; margin-bottom: 1.5rem; }
 .hero-badge-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--primary); flex-shrink: 0; animation: pulse-dot 2s ease infinite; }
@@ -236,7 +237,7 @@ const plans = [
 
 /* Sections */
 .section { padding: 5rem 2rem; }
-.section-alt { background: var(--gray-50); border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
+.section-alt { background: #e3f2ea; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
 .section-inner { max-width: 1100px; margin: 0 auto; }
 .section-header { text-align: center; margin-bottom: 3rem; }
 .section-eyebrow { font-size: 0.8rem; font-weight: 700; color: var(--primary); text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 0.5rem; }

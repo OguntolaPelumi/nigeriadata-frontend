@@ -29,8 +29,10 @@
   --info-bg: #ebf5ff;
 
   /* Surface */
-  --bg: #ffffff;
-  --bg-subtle: #f9fafb;
+  --bg: #eef7f2;
+  --bg-subtle: #f4faf7;
+  /* Light green faded page background, complements the Nigeria green */
+  --bg-fade: linear-gradient(180deg, #f4faf7 0%, #e3f2ea 100%);
   --surface: #ffffff;
   --border: #e5e7eb;
   --border-strong: #d1d5db;
@@ -62,11 +64,11 @@
 /* ── Reset ── */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; -webkit-font-smoothing: antialiased; }
-body { font-family: var(--font); color: var(--text); background: var(--bg); line-height: 1.5; }
+body { font-family: var(--font); color: var(--text); background-color: var(--bg); background-image: var(--bg-fade); background-attachment: fixed; line-height: 1.5; min-height: 100vh; }
 ::selection { background: #bfdbfe; color: var(--primary-hover); }
 
 /* ── Dashboard Layout ── */
-.dashboard-layout { display: flex; min-height: 100vh; background: var(--bg-subtle); }
+.dashboard-layout { display: flex; min-height: 100vh; background-color: var(--bg); background-image: var(--bg-fade); background-attachment: fixed; }
 .dashboard-main { flex: 1; margin-left: 256px; min-height: 100vh; display: flex; flex-direction: column; }
 .dashboard-content { padding: 1.5rem 2rem; flex: 1; max-width: 1280px; }
 
