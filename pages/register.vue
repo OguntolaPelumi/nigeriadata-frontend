@@ -166,7 +166,7 @@ const handleRegister = async () => {
   flex: 1;
   display: flex;
   padding: 2rem;
-  background: #f4faf7;
+  background: var(--bg) var(--canvas);
   overflow-y: auto;
   min-width: 0;
 }

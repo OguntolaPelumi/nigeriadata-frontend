@@ -142,7 +142,7 @@ onBeforeUnmount(() => window.removeEventListener('keydown', onKey))
 
 .sidebar {
   position: fixed; left: 0; top: 0; bottom: 0; width: 256px;
-  background: white; border-right: 1px solid var(--border);
+  background: linear-gradient(180deg, #ffffff 0%, #eef7f2 100%); border-right: 1px solid var(--border-green);
   display: flex; flex-direction: column; z-index: 100;
   box-shadow: var(--shadow-sm);
   font-family: var(--font);

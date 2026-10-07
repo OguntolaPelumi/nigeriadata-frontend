@@ -39,7 +39,8 @@ onMounted(() => fetchUser())
 
 <style scoped>
 .dash-header {
-  background: white; border-bottom: 1px solid var(--border);
+  background: var(--surface-tint); border-bottom: 1px solid var(--border-green);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
   position: sticky; top: 0; z-index: 50;
 }
 .dash-header-inner {
@@ -52,7 +53,7 @@ onMounted(() => fetchUser())
 .dash-header-right { display: flex; align-items: center; gap: 0.75rem; }
 .dash-leads-pill {
   display: flex; align-items: center; gap: 0.375rem;
-  background: var(--gray-50); border: 1px solid var(--border);
+  background: white; border: 1px solid var(--border-green);
   padding: 0.375rem 0.75rem; border-radius: 999px;
   font-size: 0.8rem; font-weight: 500; color: var(--gray-600);
 }
