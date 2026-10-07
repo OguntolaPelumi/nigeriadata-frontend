@@ -29,10 +29,10 @@
   --info-bg: #ebf5ff;
 
   /* Surface */
-  --bg: #eef7f2;
+  --bg: #e3f2ea;
   --bg-subtle: #f4faf7;
   /* Light green faded page background, complements the Nigeria green */
-  --bg-fade: linear-gradient(180deg, #f4faf7 0%, #e3f2ea 100%);
+  --bg-fade: linear-gradient(180deg, #eaf6ef 0%, #d3ebdd 100%);
   --surface: #ffffff;
   --border: #e5e7eb;
   --border-strong: #d1d5db;
