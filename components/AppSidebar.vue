@@ -104,6 +104,7 @@ const navItems = [
   { to: '/dashboard/leads', icon: 'ph:buildings-fill', label: 'B2B Leads', exact: false },
   { to: '/dashboard/reports', icon: 'ph:chart-bar-fill', label: 'Market Reports', exact: false },
   { to: '/dashboard/billing', icon: 'ph:receipt-fill', label: 'Billing', exact: false },
+  { to: '/dashboard/profile', icon: 'ph:user-circle-fill', label: 'My Profile', exact: false },
 ]
 
 // "Overview" is only active on /dashboard itself, not on every /dashboard/* page

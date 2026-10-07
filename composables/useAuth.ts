@@ -11,7 +11,8 @@ export const useAuth = () => {
     return await $fetch(`${config.public.apiBase}${endpoint}`, {
       ...options,
       headers: {
-        'Content-Type': 'application/json',
+        // Let the browser set the multipart boundary for file uploads
+        ...(options.body instanceof FormData ? {} : { 'Content-Type': 'application/json' }),
         ...(token.value ? { Authorization: `Bearer ${token.value}` } : {}),
         ...options.headers,
       },
